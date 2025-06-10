@@ -40,6 +40,39 @@ class OracleDBManager:
             self.connection.close()
             print("Database connection closed.")
 
+    # --- IMPORTANT: Ensure these methods are present in your file ---
+
+    def execute_query(self, query, params=None):
+        """
+        Executes a DML or DDL query without returning results.
+        """
+        if not self.connection:
+            raise Exception("Not connected to the database. Call .connect() first.")
+        try:
+            self.cursor.execute(query, params or {})
+            # For DML (INSERT, UPDATE, DELETE), you might want to commit immediately
+            # self.connection.commit()
+            # For DDL (CREATE, ALTER, DROP), it's automatically committed or requires commit
+            # Depending on the query type, you might want a separate commit method.
+        except cx_Oracle.Error as e:
+            error_obj = e.args[0]
+            raise Exception(f"Error executing query: {error_obj.message} - Query: {query}")
+
+
+    def fetch_dataframe(self, query, params=None):
+        """
+        Executes a SELECT query and returns results as a pandas DataFrame.
+        """
+        if not self.connection:
+            raise Exception("Not connected to the database. Call .connect() first.")
+
+        try:
+            # Use pandas read_sql directly with the connection
+            df = pd.read_sql(query, self.connection, params=params)
+            return df
+        except Exception as e:
+            raise Exception(f"Error fetching dataframe: {e} - Query: {query}")
+
     # --- Table Creation Method ---
     def create_tables(self):
         if not self.connection:
@@ -163,4 +196,4 @@ class OracleDBManager:
                 error_obj = e.args[0]
                 raise Exception(f"Error inserting reviews: {error_obj.message}")
         else:
-            print("No reviews to insert.")                           
+            print("No reviews to insert.")                   
