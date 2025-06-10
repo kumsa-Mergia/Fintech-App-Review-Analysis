@@ -197,3 +197,4 @@ class OracleDBManager:
                 raise Exception(f"Error inserting reviews: {error_obj.message}")
         else:
             print("No reviews to insert.")                   
+
